@@ -639,6 +639,55 @@
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<!-- ADD ENTRY MODAL -->
+<div id="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:100; align-items:center; justify-content:center; padding:16px;">
+  <div style="background:var(--card); border:1px solid var(--border); border-radius:20px; padding:28px; max-width:420px; width:100%; box-shadow:0 24px 80px rgba(0,0,0,0.6);">
+    <div style="font-family:'Bebas Neue'; font-size:22px; letter-spacing:2px; color:var(--gold); margin-bottom:4px;">➕ Agregar Participación</div>
+    <div id="modal-pname" style="font-size:13px; color:var(--muted); margin-bottom:20px;"></div>
+
+    <p style="font-size:12px; color:var(--muted); margin-bottom:14px; text-transform:uppercase; letter-spacing:1px;">¿Qué hizo hoy?</p>
+
+    <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
+      <label style="display:flex; align-items:center; gap:12px; cursor:pointer; padding:12px 14px; border:1px solid var(--border); border-radius:10px; transition:border-color 0.2s;" id="opt-comment-wrap">
+        <input type="checkbox" id="opt-comment" style="width:16px;height:16px;accent-color:var(--gold); cursor:pointer;" onchange="highlightOption('opt-comment-wrap', this.checked)" />
+        <div>
+          <div style="font-weight:600; font-size:14px; color:var(--text);">💬 Comentó "TORO"</div>
+          <div style="font-size:11px; color:var(--muted);">+1 entrada (solo si no había comentado antes)</div>
+        </div>
+      </label>
+
+      <label style="display:flex; align-items:center; gap:12px; cursor:pointer; padding:12px 14px; border:1px solid var(--border); border-radius:10px; transition:border-color 0.2s;" id="opt-story-wrap">
+        <input type="checkbox" id="opt-story" style="width:16px;height:16px;accent-color:var(--gold); cursor:pointer;" onchange="highlightOption('opt-story-wrap', this.checked); toggleStoryCount()" />
+        <div style="flex:1;">
+          <div style="font-weight:600; font-size:14px; color:var(--text);">📱 Compartió en Stories</div>
+          <div style="font-size:11px; color:var(--muted);">+5 entradas por cada vez</div>
+        </div>
+        <div id="story-count-wrap" style="display:none; flex-shrink:0;">
+          <input type="number" id="opt-story-count" min="1" value="1" style="width:60px; text-align:center; padding:6px 8px;" onclick="event.stopPropagation()" />
+        </div>
+      </label>
+
+      <label style="display:flex; align-items:center; gap:12px; cursor:pointer; padding:12px 14px; border:1px solid var(--border); border-radius:10px; transition:border-color 0.2s;" id="opt-billboard-wrap">
+        <input type="checkbox" id="opt-billboard" style="width:16px;height:16px;accent-color:var(--gold); cursor:pointer;" onchange="highlightOption('opt-billboard-wrap', this.checked); toggleBillboardCount()" />
+        <div style="flex:1;">
+          <div style="font-weight:600; font-size:14px; color:var(--text);">📸 Foto con Billboard</div>
+          <div style="font-size:11px; color:var(--muted);">+10 entradas por cada foto</div>
+        </div>
+        <div id="billboard-count-wrap" style="display:none; flex-shrink:0;">
+          <input type="number" id="opt-billboard-count" min="1" value="1" style="width:60px; text-align:center; padding:6px 8px;" onclick="event.stopPropagation()" />
+        </div>
+      </label>
+    </div>
+
+    <div id="modal-preview" style="background:rgba(201,168,76,0.08); border:1px solid rgba(201,168,76,0.2); border-radius:10px; padding:12px; margin-bottom:20px; font-size:13px; color:var(--gold-light); text-align:center; display:none;"></div>
+
+    <div style="display:flex; gap:10px;">
+      <button class="btn btn-primary" style="flex:1;" onclick="confirmAddEntry()">✅ Confirmar</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <script>
   let participants = JSON.parse(localStorage.getItem('toro_participants') || '[]');
   let activeFilter = 'all';
@@ -781,6 +830,7 @@
           </div>
         </div>
         <div class="p-actions">
+          <button class="btn btn-ghost btn-sm" onclick="openAddEntry(${p.id})" title="Agregar participación">＋</button>
           <button class="btn btn-danger btn-sm" onclick="deleteParticipant(${p.id})">✕</button>
         </div>
       </div>`;
@@ -890,6 +940,105 @@
     t.className = `toast ${type} show`;
     setTimeout(() => t.classList.remove('show'), 3000);
   }
+
+  // MODAL
+  let modalTargetId = null;
+
+  function openAddEntry(id) {
+    modalTargetId = id;
+    const p = participants.find(x => x.id === id);
+    document.getElementById('modal-pname').textContent = `${p.name} · ${p.handle || 'sin handle'} · ${calcEntries(p)} entradas actuales`;
+    document.getElementById('opt-comment').checked = false;
+    document.getElementById('opt-story').checked = false;
+    document.getElementById('opt-billboard').checked = false;
+    document.getElementById('opt-story-count').value = 1;
+    document.getElementById('opt-billboard-count').value = 1;
+    document.getElementById('story-count-wrap').style.display = 'none';
+    document.getElementById('billboard-count-wrap').style.display = 'none';
+    document.getElementById('modal-preview').style.display = 'none';
+    ['opt-comment-wrap','opt-story-wrap','opt-billboard-wrap'].forEach(id => {
+      document.getElementById(id).style.borderColor = 'var(--border)';
+    });
+    const overlay = document.getElementById('modal-overlay');
+    overlay.style.display = 'flex';
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').style.display = 'none';
+    modalTargetId = null;
+  }
+
+  function highlightOption(wrapId, checked) {
+    document.getElementById(wrapId).style.borderColor = checked ? 'var(--gold)' : 'var(--border)';
+    updateModalPreview();
+  }
+
+  function toggleStoryCount() {
+    const checked = document.getElementById('opt-story').checked;
+    document.getElementById('story-count-wrap').style.display = checked ? 'block' : 'none';
+    updateModalPreview();
+  }
+
+  function toggleBillboardCount() {
+    const checked = document.getElementById('opt-billboard').checked;
+    document.getElementById('billboard-count-wrap').style.display = checked ? 'block' : 'none';
+    updateModalPreview();
+  }
+
+  function updateModalPreview() {
+    const comment = document.getElementById('opt-comment').checked;
+    const story = document.getElementById('opt-story').checked;
+    const billboard = document.getElementById('opt-billboard').checked;
+    const storyCount = parseInt(document.getElementById('opt-story-count').value) || 0;
+    const billboardCount = parseInt(document.getElementById('opt-billboard-count').value) || 0;
+    let added = 0;
+    const parts = [];
+    if (comment) { added += 1; parts.push('💬 +1'); }
+    if (story && storyCount > 0) { added += storyCount * 5; parts.push(`📱 +${storyCount * 5}`); }
+    if (billboard && billboardCount > 0) { added += billboardCount * 10; parts.push(`📸 +${billboardCount * 10}`); }
+    const preview = document.getElementById('modal-preview');
+    if (added > 0) {
+      preview.style.display = 'block';
+      preview.textContent = `Se agregarán ${added} entradas → ${parts.join('  ')}`;
+    } else {
+      preview.style.display = 'none';
+    }
+  }
+
+  function confirmAddEntry() {
+    if (!modalTargetId) return;
+    const p = participants.find(x => x.id === modalTargetId);
+    if (!p) return;
+
+    const comment = document.getElementById('opt-comment').checked;
+    const story = document.getElementById('opt-story').checked;
+    const billboard = document.getElementById('opt-billboard').checked;
+    const storyCount = parseInt(document.getElementById('opt-story-count').value) || 0;
+    const billboardCount = parseInt(document.getElementById('opt-billboard-count').value) || 0;
+
+    let added = 0;
+    if (comment) {
+      if (p.commented >= 1) { showToast('⚠️ Ya tiene comentario registrado, no suma más', 'error'); return; }
+      p.commented = 1; added += 1;
+    }
+    if (story && storyCount > 0) { p.stories += storyCount; added += storyCount * 5; }
+    if (billboard && billboardCount > 0) { p.billboards += billboardCount; added += billboardCount * 10; }
+
+    if (added === 0) return showToast('⚠️ Selecciona al menos una acción', 'error');
+
+    save();
+    updateStats();
+    renderRecent();
+    renderList();
+    renderProbabilities();
+    closeModal();
+    showToast(`✅ +${added} entradas para ${p.name}`);
+  }
+
+  // Close modal on overlay click
+  document.getElementById('modal-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
 
   // Init
   updateStats();
