@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Purple Roots Giveaway App</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --burgundy: #7B1C2E;
+    --dark: #0D0A0B;
+    --card: #141014;
+    --border: #2A1E22;
+    --gold: #C9A84C;
+    --gold-light: #E8C97A;
+    --text: #F0E8DC;
+    --muted: #7A6A60;
+    --green: #2ECC71;
+    --red: #E74C3C;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(123,28,46,0.25) 0%, transparent 70%),
+      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.015) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.015) 40px);
+  }
+
+  header {
+    text-align: center;
+    padding: 48px 24px 32px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+
+  .bull-icon {
+    font-size: 36px;
+    display: block;
+    margin-bottom: 8px;
+    filter: drop-shadow(0 0 20px rgba(201,168,76,0.5));
+  }
+
+  header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(28px, 6vw, 52px);
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+  }
+
+  header p {
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 32px 16px 80px; }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 32px;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    transition: all 0.2s;
+  }
+
+  .tab.active {
+    background: var(--burgundy);
+    color: var(--gold-light);
+  }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* CARDS */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 2px;
+    color: var(--gold);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* FORM ELEMENTS */
+  label { font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px; }
+
+  input[type="text"], input[type="number"], select {
+    width: 100%;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input[type="text"]:focus, input[type="number"]:focus, select:focus {
+    border-color: var(--gold);
+  }
+
+  select option { background: #1a1214; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  .form-full { margin-bottom: 16px; }
+
+  .badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .badge {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .badge-comment { background: rgba(201,168,76,0.15); color: var(--gold-light); border: 1px solid rgba(201,168,76,0.3); }
+  .badge-story { background: rgba(46,204,113,0.12); color: #5ddf94; border: 1px solid rgba(46,204,113,0.3); }
+  .badge-billboard { background: rgba(123,28,46,0.3); color: #e8748a; border: 1px solid rgba(123,28,46,0.5); }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 20px;
+    border-radius: 8px;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-primary { background: var(--burgundy); color: var(--gold-light); }
+  .btn-primary:hover { background: #9b2438; transform: translateY(-1px); }
+  .btn-gold { background: linear-gradient(135deg, var(--gold), var(--gold-light)); color: var(--dark); }
+  .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(201,168,76,0.3); }
+  .btn-danger { background: rgba(231,76,60,0.15); color: #e74c3c; border: 1px solid rgba(231,76,60,0.3); }
+  .btn-danger:hover { background: rgba(231,76,60,0.25); }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-sm { padding: 7px 14px; font-size: 12px; }
+
+  /* PARTICIPANT LIST */
+  .participant-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    transition: border-color 0.2s;
+    gap: 12px;
+  }
+
+  .participant-item:hover { border-color: rgba(201,168,76,0.3); }
+
+  .p-info { flex: 1; min-width: 0; }
+  .p-name { font-weight: 600; font-size: 14px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .p-handle { font-size: 11px; color: var(--muted); }
+
+  .p-entries {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .entry-count {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    color: var(--gold);
+    min-width: 30px;
+    text-align: right;
+    line-height: 1;
+  }
+
+  .entry-label { font-size: 10px; color: var(--muted); text-transform: uppercase; }
+
+  .p-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+  /* STATS BAR */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .stat-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+  /* WHEEL / DRAW */
+  .draw-section {
+    text-align: center;
+    padding: 32px;
+  }
+
+  .draw-btn {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 3px;
+    padding: 20px 48px;
+    background: linear-gradient(135deg, var(--burgundy), #9b2438);
+    color: var(--gold-light);
+    border: 2px solid var(--gold);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 0 30px rgba(123,28,46,0.4);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .draw-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(201,168,76,0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .draw-btn:hover { transform: scale(1.03); box-shadow: 0 0 50px rgba(123,28,46,0.6); }
+  .draw-btn:hover::before { opacity: 1; }
+  .draw-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .winner-box {
+    display: none;
+    margin-top: 32px;
+    padding: 32px;
+    background: linear-gradient(135deg, rgba(201,168,76,0.1), rgba(123,28,46,0.2));
+    border: 2px solid var(--gold);
+    border-radius: 16px;
+    animation: winnerReveal 0.6s ease;
+  }
+
+  @keyframes winnerReveal {
+    0% { opacity: 0; transform: scale(0.9); }
+    60% { transform: scale(1.03); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  .winner-box .trophy { font-size: 48px; display: block; margin-bottom: 12px; }
+  .winner-box .winner-label { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .winner-box .winner-name { font-family: 'Bebas Neue', sans-serif; font-size: 42px; color: var(--gold); letter-spacing: 2px; }
+  .winner-box .winner-handle { color: var(--muted); font-size: 16px; margin-top: 4px; }
+  .winner-box .winner-entries { font-size: 13px; color: var(--gold-light); margin-top: 12px; opacity: 0.8; }
+
+  /* ROLLING ANIMATION */
+  .rolling-names {
+    display: none;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    color: var(--gold);
+    letter-spacing: 3px;
+    margin-top: 24px;
+    min-height: 48px;
+    animation: flicker 0.08s infinite;
+  }
+
+  @keyframes flicker {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+  }
+
+  /* INSTRUCTIONS */
+  .instruction-block {
+    background: rgba(0,0,0,0.3);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 8px 8px 0;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .instruction-block h4 { font-size: 13px; font-weight: 600; color: var(--gold-light); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .instruction-block p, .instruction-block li { font-size: 13px; color: var(--muted); line-height: 1.7; }
+  .instruction-block ul { padding-left: 16px; }
+
+  .highlight { color: var(--text); font-weight: 600; }
+
+  /* PROGRESS BAR */
+  .prob-bar-wrap { margin-top: 6px; }
+  .prob-bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .prob-fill { height: 100%; background: linear-gradient(90deg, var(--burgundy), var(--gold)); border-radius: 2px; transition: width 0.3s; }
+  .prob-pct { font-size: 10px; color: var(--muted); margin-top: 3px; }
+
+  /* EMPTY STATE */
+  .empty-state { text-align: center; padding: 48px; color: var(--muted); }
+  .empty-state .icon { font-size: 40px; display: block; margin-bottom: 12px; opacity: 0.4; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 20px;
+    font-size: 14px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 999;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { border-color: rgba(46,204,113,0.4); }
+  .toast.error { border-color: rgba(231,76,60,0.4); }
+
+  /* FILTER BAR */
+  .filter-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .filter-btn.active { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.1); }
+
+  .search-input { flex: 1; min-width: 160px; }
+
+  /* PLACE BADGES */
+  .place-1 { background: linear-gradient(135deg, rgba(201,168,76,0.2), rgba(201,168,76,0.05)); border-color: var(--gold) !important; }
+  .place-2 { background: rgba(192,192,192,0.05); border-color: #aaa !important; }
+  .place-3 { background: rgba(180,120,60,0.08); border-color: #b47840 !important; }
+
+  @media (max-width: 600px) {
+    .form-row { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .form-row-2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="bull-icon">🐂</span>
+  <h1>Purple Roots Giveaway App</h1>
+  <p>Free Gas for a Year · El Paso, TX · May 20</p>
+</header>
+
+<div class="container">
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-box">
+      <div class="stat-value" id="stat-participants">0</div>
+      <div class="stat-label">Participantes</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value" id="stat-entries">0</div>
+      <div class="stat-label">Entradas Totales</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value" id="stat-comments">0</div>
+      <div class="stat-label">Comentarios</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value" id="stat-stories">0</div>
+      <div class="stat-label">Stories / Billboards</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('add')">➕ Agregar</button>
+    <button class="tab" onclick="switchTab('list')">📋 Lista</button>
+    <button class="tab" onclick="switchTab('draw')">🎰 Sorteo</button>
+    <button class="tab" onclick="switchTab('guide')">📖 Guía</button>
+  </div>
+
+  <!-- TAB: AGREGAR -->
+  <div class="tab-content active" id="tab-add">
+    <div class="card">
+      <div class="card-title">👤 Agregar Participante</div>
+
+      <div class="form-row-2">
+        <div>
+          <label>Nombre</label>
+          <input type="text" id="p-name" placeholder="Ej: Juan Pérez" />
+        </div>
+        <div>
+          <label>Instagram Handle</label>
+          <input type="text" id="p-handle" placeholder="@usuario" />
+        </div>
+      </div>
+
+      <div class="card-title" style="font-size:14px; margin-top:8px;">📊 Entradas</div>
+      <div class="badge-row">
+        <span class="badge badge-comment">💬 Comentario = 1 entrada</span>
+        <span class="badge badge-story">📱 Story compartida = 5 entradas</span>
+        <span class="badge badge-billboard">📸 Foto Billboard = 10 entradas</span>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label>¿Comentó "TORO"?</label>
+          <select id="p-commented">
+            <option value="0">No</option>
+            <option value="1">Sí (+1 entrada)</option>
+          </select>
+        </div>
+        <div>
+          <label>Stories compartidas (×5)</label>
+          <input type="number" id="p-stories" placeholder="0" min="0" value="0" />
+        </div>
+        <div>
+          <label>Fotos Billboards (×10)</label>
+          <input type="number" id="p-billboards" placeholder="0" min="0" value="0" />
+        </div>
+      </div>
+
+      <div class="form-full">
+        <label>Notas (opcional)</label>
+        <input type="text" id="p-notes" placeholder="Ej: tagueó a @maria y @pedro, compartió 3 veces..." />
+      </div>
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="addParticipant()">➕ Agregar Participante</button>
+        <button class="btn btn-ghost" onclick="clearForm()">✕ Limpiar</button>
+      </div>
+    </div>
+
+    <div class="card" style="border-color: rgba(201,168,76,0.2);">
+      <div class="card-title">⚡ Últimos agregados</div>
+      <div id="recent-list">
+        <div class="empty-state"><span class="icon">👥</span>Aún no hay participantes</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: LISTA -->
+  <div class="tab-content" id="tab-list">
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
+        <div class="card-title" style="margin:0;">📋 Todos los Participantes</div>
+        <button class="btn btn-danger btn-sm" onclick="clearAll()">🗑 Limpiar Todo</button>
+      </div>
+
+      <div class="filter-bar">
+        <input type="text" class="search-input" id="search-input" placeholder="Buscar nombre o @handle..." oninput="renderList()" />
+        <button class="filter-btn active" onclick="setFilter('all', this)">Todos</button>
+        <button class="filter-btn" onclick="setFilter('comment', this)">💬 Comentaron</button>
+        <button class="filter-btn" onclick="setFilter('story', this)">📱 Stories</button>
+        <button class="filter-btn" onclick="setFilter('billboard', this)">📸 Billboards</button>
+      </div>
+
+      <div id="full-list">
+        <div class="empty-state"><span class="icon">👥</span>Sin participantes aún</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: SORTEO -->
+  <div class="tab-content" id="tab-draw">
+    <div class="card">
+      <div class="card-title">🎰 Sorteo Ponderado</div>
+      <p style="color: var(--muted); font-size:13px; line-height:1.7; margin-bottom:20px;">
+        El sistema asigna probabilidades según las entradas de cada participante. Más entradas = más probabilidad de ganar. El sorteo es aleatorio y ponderado.
+      </p>
+
+      <div class="draw-section">
+        <button class="draw-btn" id="draw-btn" onclick="startDraw()">🐂 INICIAR SORTEO</button>
+        <div class="rolling-names" id="rolling-names"></div>
+        <div class="winner-box" id="winner-box">
+          <span class="trophy">🏆</span>
+          <div class="winner-label">Ganador — 1er Lugar</div>
+          <div class="winner-name" id="winner-name"></div>
+          <div class="winner-handle" id="winner-handle"></div>
+          <div class="winner-entries" id="winner-entries"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="places-card" style="display:none;">
+      <div class="card-title">🥈 2do y 3er Lugar — $100 Gas Card</div>
+      <div id="places-list"></div>
+      <div style="margin-top:16px;">
+        <button class="btn btn-ghost btn-sm" onclick="drawPlaces()">🎲 Sortear 2do y 3er lugar</button>
+      </div>
+    </div>
+
+    <div class="card" id="probability-card">
+      <div class="card-title">📊 Probabilidades</div>
+      <div id="prob-list">
+        <div class="empty-state"><span class="icon">📊</span>Agrega participantes para ver probabilidades</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: GUÍA -->
+  <div class="tab-content" id="tab-guide">
+    <div class="card">
+      <div class="card-title">📖 Cómo rastrear participantes</div>
+
+      <div class="instruction-block">
+        <h4>💬 PASO 1 — Comentarios con "TORO"</h4>
+        <ul>
+          <li>Abre el post de <span class="highlight">@yaguelaw</span> en Instagram</li>
+          <li>Ve todos los comentarios y busca los que digan <span class="highlight">"TORO"</span></li>
+          <li>Verifica que hayan tageado a 2 personas en el mismo comentario</li>
+          <li>Anota: nombre, @handle → agrega con <span class="highlight">1 comentario = 1 entrada</span></li>
+          <li>⚠️ Si alguien comentó más de una vez, solo cuenta el primero</li>
+        </ul>
+      </div>
+
+      <div class="instruction-block" style="border-color: #5ddf94;">
+        <h4>📱 PASO 2 — Stories compartidas (+5 por cada vez)</h4>
+        <ul>
+          <li>Ve a <span class="highlight">Notificaciones → Actividad → Menciones</span></li>
+          <li>O entra a tu perfil → presiona el post → ve <span class="highlight">"Ver quién lo compartió"</span></li>
+          <li>Cuenta cuántas veces compartió cada persona</li>
+          <li>Ejemplo: compartió 3 veces → <span class="highlight">+15 entradas</span></li>
+          <li>💡 Usa el campo "Notas" para documentarlo</li>
+        </ul>
+      </div>
+
+      <div class="instruction-block" style="border-color: #e8748a;">
+        <h4>📸 PASO 3 — Fotos con Billboards (+10 por foto)</h4>
+        <ul>
+          <li>Ve a <span class="highlight">Notificaciones → Etiquetas</span></li>
+          <li>Busca a quien te haya etiquetado con fotos de los billboards en:</li>
+          <li>— <span class="highlight">Mesa & Executive</span></li>
+          <li>— <span class="highlight">Lee Trevino & Pebble Hills</span></li>
+          <li>Cada foto en Stories donde te etiqueten = <span class="highlight">+10 entradas</span></li>
+        </ul>
+      </div>
+
+      <div class="instruction-block" style="border-color: rgba(123,28,46,0.8);">
+        <h4>🗓 Cuándo revisar</h4>
+        <ul>
+          <li>Revisa <span class="highlight">diario a las 6pm</span> y agrega participantes nuevos</li>
+          <li>Si alguien volvió a compartir hoy, actualiza sus entradas</li>
+          <li>El <span class="highlight">20 de mayo</span> cierra el giveaway — congela la lista y sortea</li>
+        </ul>
+      </div>
+
+      <div class="instruction-block" style="border-color: var(--gold);">
+        <h4>🎬 El día del sorteo</h4>
+        <ul>
+          <li>Haz un <span class="highlight">Live en Instagram</span> o graba la pantalla</li>
+          <li>Muestra la lista de participantes en pantalla</li>
+          <li>Presiona el botón de sorteo frente a todos</li>
+          <li>Anuncia en Stories + post el ganador</li>
+          <li>Pide al ganador que te escriba por DM para coordinar el premio</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  let participants = JSON.parse(localStorage.getItem('toro_participants') || '[]');
+  let activeFilter = 'all';
+  let firstPlaceId = null;
+
+  function save() {
+    localStorage.setItem('toro_participants', JSON.stringify(participants));
+  }
+
+  function calcEntries(p) {
+    return parseInt(p.commented) + (parseInt(p.stories) * 5) + (parseInt(p.billboards) * 10);
+  }
+
+  function updateStats() {
+    const total = participants.length;
+    const totalEntries = participants.reduce((s, p) => s + calcEntries(p), 0);
+    const commented = participants.filter(p => p.commented > 0).length;
+    const stories = participants.reduce((s, p) => s + parseInt(p.stories) + parseInt(p.billboards), 0);
+    document.getElementById('stat-participants').textContent = total;
+    document.getElementById('stat-entries').textContent = totalEntries;
+    document.getElementById('stat-comments').textContent = commented;
+    document.getElementById('stat-stories').textContent = stories;
+  }
+
+  function addParticipant() {
+    const name = document.getElementById('p-name').value.trim();
+    const handle = document.getElementById('p-handle').value.trim();
+    if (!name) return showToast('⚠️ Escribe un nombre', 'error');
+
+    const existing = participants.find(p => p.handle && handle && p.handle.toLowerCase() === handle.toLowerCase());
+    if (existing) return showToast('⚠️ Este @handle ya existe. Edítalo en la lista.', 'error');
+
+    const p = {
+      id: Date.now(),
+      name,
+      handle: handle || '',
+      commented: parseInt(document.getElementById('p-commented').value),
+      stories: parseInt(document.getElementById('p-stories').value) || 0,
+      billboards: parseInt(document.getElementById('p-billboards').value) || 0,
+      notes: document.getElementById('p-notes').value.trim(),
+      addedAt: new Date().toLocaleString('es-MX')
+    };
+
+    participants.push(p);
+    save();
+    updateStats();
+    renderRecent();
+    renderList();
+    renderProbabilities();
+    clearForm();
+    showToast(`✅ ${name} agregado con ${calcEntries(p)} entradas`);
+  }
+
+  function clearForm() {
+    ['p-name','p-handle','p-notes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('p-commented').value = '0';
+    document.getElementById('p-stories').value = '0';
+    document.getElementById('p-billboards').value = '0';
+  }
+
+  function deleteParticipant(id) {
+    participants = participants.filter(p => p.id !== id);
+    save();
+    updateStats();
+    renderRecent();
+    renderList();
+    renderProbabilities();
+    showToast('🗑 Participante eliminado');
+  }
+
+  function clearAll() {
+    if (!confirm('¿Eliminar TODOS los participantes? Esto no se puede deshacer.')) return;
+    participants = [];
+    save();
+    updateStats();
+    renderRecent();
+    renderList();
+    renderProbabilities();
+    document.getElementById('winner-box').style.display = 'none';
+    document.getElementById('places-card').style.display = 'none';
+    firstPlaceId = null;
+  }
+
+  function setFilter(f, btn) {
+    activeFilter = f;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderList();
+  }
+
+  function renderRecent() {
+    const el = document.getElementById('recent-list');
+    const recent = [...participants].reverse().slice(0, 3);
+    if (!recent.length) {
+      el.innerHTML = '<div class="empty-state"><span class="icon">👥</span>Aún no hay participantes</div>';
+      return;
+    }
+    el.innerHTML = recent.map(p => participantHTML(p, true)).join('');
+  }
+
+  function renderList() {
+    const el = document.getElementById('full-list');
+    const search = document.getElementById('search-input').value.toLowerCase();
+    let filtered = [...participants];
+    if (search) filtered = filtered.filter(p => p.name.toLowerCase().includes(search) || p.handle.toLowerCase().includes(search));
+    if (activeFilter === 'comment') filtered = filtered.filter(p => p.commented > 0);
+    if (activeFilter === 'story') filtered = filtered.filter(p => p.stories > 0);
+    if (activeFilter === 'billboard') filtered = filtered.filter(p => p.billboards > 0);
+    filtered.sort((a,b) => calcEntries(b) - calcEntries(a));
+    if (!filtered.length) {
+      el.innerHTML = '<div class="empty-state"><span class="icon">👥</span>Sin resultados</div>';
+      return;
+    }
+    el.innerHTML = filtered.map((p, i) => participantHTML(p, false, i)).join('');
+  }
+
+  function participantHTML(p, compact = false, rank = -1) {
+    const entries = calcEntries(p);
+    const totalEntries = participants.reduce((s, q) => s + calcEntries(q), 0);
+    const pct = totalEntries > 0 ? ((entries / totalEntries) * 100).toFixed(1) : 0;
+    const rankClass = rank === 0 ? 'place-1' : rank === 1 ? 'place-2' : rank === 2 ? 'place-3' : '';
+    const badges = [];
+    if (p.commented) badges.push(`<span class="badge badge-comment">💬 ×1</span>`);
+    if (p.stories > 0) badges.push(`<span class="badge badge-story">📱 ×${p.stories}</span>`);
+    if (p.billboards > 0) badges.push(`<span class="badge badge-billboard">📸 ×${p.billboards}</span>`);
+
+    return `
+      <div class="participant-item ${rankClass}">
+        <div class="p-info">
+          <div class="p-name">${rank >= 0 ? `<span style="color:var(--muted);font-size:11px;">#${rank+1} </span>` : ''}${p.name}</div>
+          <div class="p-handle">${p.handle || '—'}</div>
+          ${!compact ? `<div class="badge-row" style="margin-top:6px;">${badges.join('') || '<span style="font-size:11px;color:var(--muted);">Sin entradas aún</span>'}</div>` : ''}
+          ${!compact ? `<div class="prob-bar-wrap"><div class="prob-bar"><div class="prob-fill" style="width:${pct}%"></div></div><div class="prob-pct">${pct}% de probabilidad</div></div>` : ''}
+          ${p.notes ? `<div style="font-size:11px;color:var(--muted);margin-top:4px;">📝 ${p.notes}</div>` : ''}
+        </div>
+        <div class="p-entries">
+          <div>
+            <div class="entry-count">${entries}</div>
+            <div class="entry-label">entradas</div>
+          </div>
+        </div>
+        <div class="p-actions">
+          <button class="btn btn-danger btn-sm" onclick="deleteParticipant(${p.id})">✕</button>
+        </div>
+      </div>`;
+  }
+
+  function renderProbabilities() {
+    const el = document.getElementById('prob-list');
+    if (!participants.length) {
+      el.innerHTML = '<div class="empty-state"><span class="icon">📊</span>Agrega participantes para ver probabilidades</div>';
+      return;
+    }
+    const totalEntries = participants.reduce((s,p) => s + calcEntries(p), 0);
+    const sorted = [...participants].sort((a,b) => calcEntries(b) - calcEntries(a));
+    el.innerHTML = sorted.map(p => {
+      const entries = calcEntries(p);
+      const pct = totalEntries > 0 ? ((entries / totalEntries) * 100).toFixed(1) : 0;
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+        <div>
+          <span style="font-weight:600;font-size:14px;">${p.name}</span>
+          <span style="color:var(--muted);font-size:12px;margin-left:8px;">${p.handle}</span>
+        </div>
+        <div style="text-align:right;min-width:100px;">
+          <div style="font-family:'Bebas Neue';font-size:18px;color:var(--gold);">${entries} entradas</div>
+          <div style="font-size:11px;color:var(--muted);">${pct}%</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function weightedRandom(pool) {
+    const totalEntries = pool.reduce((s,p) => s + calcEntries(p), 0);
+    let rand = Math.random() * totalEntries;
+    for (const p of pool) {
+      rand -= calcEntries(p);
+      if (rand <= 0) return p;
+    }
+    return pool[pool.length - 1];
+  }
+
+  function startDraw() {
+    if (participants.length === 0) return showToast('⚠️ No hay participantes', 'error');
+    const btn = document.getElementById('draw-btn');
+    const rolling = document.getElementById('rolling-names');
+    btn.disabled = true;
+    rolling.style.display = 'block';
+    document.getElementById('winner-box').style.display = 'none';
+
+    let count = 0;
+    const interval = setInterval(() => {
+      const rand = participants[Math.floor(Math.random() * participants.length)];
+      rolling.textContent = rand.name.toUpperCase();
+      count++;
+      if (count > 28) {
+        clearInterval(interval);
+        rolling.style.display = 'none';
+        const winner = weightedRandom(participants);
+        firstPlaceId = winner.id;
+        const entries = calcEntries(winner);
+        const totalEntries = participants.reduce((s,p) => s + calcEntries(p), 0);
+        const pct = ((entries / totalEntries) * 100).toFixed(1);
+        document.getElementById('winner-name').textContent = winner.name.toUpperCase();
+        document.getElementById('winner-handle').textContent = winner.handle || '';
+        document.getElementById('winner-entries').textContent = `${entries} entradas · ${pct}% de probabilidad`;
+        document.getElementById('winner-box').style.display = 'block';
+        document.getElementById('places-card').style.display = 'block';
+        document.getElementById('places-list').innerHTML = '';
+        btn.disabled = false;
+        showToast(`🏆 ¡${winner.name} ganó el 1er lugar!`);
+      }
+    }, 80);
+  }
+
+  function drawPlaces() {
+    const pool = participants.filter(p => p.id !== firstPlaceId);
+    if (pool.length < 2) return showToast('⚠️ Necesitas al menos 3 participantes', 'error');
+    const second = weightedRandom(pool);
+    const pool2 = pool.filter(p => p.id !== second.id);
+    const third = pool2.length > 0 ? weightedRandom(pool2) : null;
+    let html = `<div class="participant-item place-2" style="margin-bottom:8px;">
+      <div class="p-info"><div class="p-name">🥈 2do Lugar — $100 Gas Card</div><div style="font-size:18px;font-family:'Bebas Neue';color:#ccc;margin-top:4px;">${second.name.toUpperCase()}</div><div style="font-size:12px;color:var(--muted);">${second.handle}</div></div>
+      <div class="p-entries"><div class="entry-count" style="color:#ccc;">${calcEntries(second)}</div><div class="entry-label">entradas</div></div>
+    </div>`;
+    if (third) {
+      html += `<div class="participant-item place-3">
+        <div class="p-info"><div class="p-name">🥉 3er Lugar — $100 Gas Card</div><div style="font-size:18px;font-family:'Bebas Neue';color:#b47840;margin-top:4px;">${third.name.toUpperCase()}</div><div style="font-size:12px;color:var(--muted);">${third.handle}</div></div>
+        <div class="p-entries"><div class="entry-count" style="color:#b47840;">${calcEntries(third)}</div><div class="entry-label">entradas</div></div>
+      </div>`;
+    }
+    document.getElementById('places-list').innerHTML = html;
+    showToast('✅ 2do y 3er lugar sorteados');
+  }
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach((t,i) => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    const tabs = ['add','list','draw','guide'];
+    const idx = tabs.indexOf(tab);
+    document.querySelectorAll('.tab')[idx].classList.add('active');
+    document.getElementById('tab-' + tab).classList.add('active');
+    if (tab === 'list') renderList();
+    if (tab === 'draw') renderProbabilities();
+  }
+
+  function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast ${type} show`;
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // Init
+  updateStats();
+  renderRecent();
+  renderList();
+  renderProbabilities();
+</script>
+</body>
+</html>
