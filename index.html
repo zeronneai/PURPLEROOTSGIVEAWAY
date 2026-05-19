@@ -42,7 +42,7 @@
     height: 100vh;
     width: auto;
     pointer-events: none;
-    z-index: 0;
+    z-index: 1;
     opacity: 0.95;
     object-fit: cover;
     object-position: top center;
@@ -57,6 +57,7 @@
     text-align: center;
     padding: 48px 24px 32px;
     position: relative;
+    z-index: 2;
   }
 
   .bull-icon {
@@ -86,7 +87,7 @@
     margin-top: 6px;
   }
 
-  .container { max-width: 960px; margin: 0 auto; padding: 32px 16px 80px; }
+  .container { max-width: 960px; margin: 0 auto; padding: 32px 16px 80px; position: relative; z-index: 2; }
 
   /* TABS */
   .tabs {
