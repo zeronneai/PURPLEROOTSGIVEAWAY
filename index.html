@@ -27,9 +27,28 @@
     font-family: 'DM Sans', sans-serif;
     min-height: 100vh;
     background-image:
-      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(123,28,46,0.25) 0%, transparent 70%),
-      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.015) 40px),
-      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.015) 40px);
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(123,28,46,0.35) 0%, transparent 70%),
+      linear-gradient(rgba(13,10,11,0.72), rgba(13,10,11,0.72)),
+      url('https://res.cloudinary.com/dsprn0ew4/image/upload/v1773423686/Genera_esa_imagen_en_4k_pero_quitale_el_texto_2k_delpmaspu_ksvfr0.jpg');
+    background-size: cover;
+    background-position: center top;
+    background-attachment: fixed;
+  }
+
+  .side-mascot {
+    position: fixed;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: clamp(120px, 14vw, 220px);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.92;
+    filter: drop-shadow(4px 0 24px rgba(0,0,0,0.6));
+  }
+
+  @media (max-width: 1100px) {
+    .side-mascot { display: none; }
   }
 
   header {
@@ -40,10 +59,11 @@
   }
 
   .bull-icon {
-    font-size: 36px;
     display: block;
-    margin-bottom: 8px;
-    filter: drop-shadow(0 0 20px rgba(201,168,76,0.5));
+    margin: 0 auto 12px;
+    width: clamp(72px, 12vw, 120px);
+    height: auto;
+    filter: drop-shadow(0 0 24px rgba(201,168,76,0.55));
   }
 
   header h1 {
@@ -419,8 +439,18 @@
 </head>
 <body>
 
+<img
+  class="side-mascot"
+  src="https://res.cloudinary.com/dsprn0ew4/image/upload/v1779230307/ChatGPT_Image_May_19_2026_04_38_16_PM_ghk1mk.png"
+  alt=""
+/>
+
 <header>
-  <span class="bull-icon">🐂</span>
+  <img
+    class="bull-icon"
+    src="https://res.cloudinary.com/dsprn0ew4/image/upload/v1774034299/ELIMINA_EL_FONDO__202603201317_atibp1.jpg"
+    alt="Purple Roots"
+  />
   <h1>GIVEAWAY APP By Purple Roots</h1>
   <p>Free Gas for a Year · El Paso, TX · May 20</p>
 </header>
