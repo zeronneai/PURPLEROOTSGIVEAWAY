@@ -504,6 +504,8 @@
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
         <button class="btn btn-primary" onclick="addParticipant()">➕ Agregar Participante</button>
         <button class="btn btn-ghost" onclick="clearForm()">✕ Limpiar</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('csv-file-input').click()" style="background: rgba(124, 58, 237, 0.2); border-color: rgba(167, 139, 250, 0.4);">📥 Importar CSV (Instagram)</button>
+        <input type="file" id="csv-file-input" accept=".csv" style="display:none;" onchange="handleCSVImport(event)" />
       </div>
     </div>
 
@@ -711,6 +713,235 @@
     document.getElementById('stat-comments').textContent = commented;
     document.getElementById('stat-stories').textContent = stories;
   }
+
+  // ============ IMPORTADOR DE CSV (Instagram comments) ============
+  function handleCSVImport(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const text = e.target.result;
+        processCSVText(text);
+      } catch (err) {
+        showToast('⚠️ Error leyendo el archivo: ' + err.message, 'error');
+      }
+    };
+    reader.readAsText(file, 'UTF-8');
+    // Reset input para permitir re-importar el mismo archivo
+    event.target.value = '';
+  }
+
+  function parseCSVLine(line) {
+    // Parser que respeta comillas dobles (formato Commentpicker/Excel estándar)
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      const next = line[i + 1];
+      if (char === '"' && inQuotes && next === '"') {
+        current += '"';
+        i++;
+      } else if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === ',' && !inQuotes) {
+        result.push(current);
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    result.push(current);
+    return result;
+  }
+
+  function processCSVText(csvText) {
+    const lines = csvText.split(/\r?\n/).filter(l => l.trim().length > 0);
+    if (lines.length < 2) {
+      return showToast('⚠️ El CSV está vacío o solo tiene encabezado', 'error');
+    }
+
+    // Detectar índices de columnas desde el header
+    const header = parseCSVLine(lines[0]).map(h => h.toLowerCase().trim());
+    const userIdx = header.findIndex(h => h.includes('username') || h.includes('user'));
+    const textIdx = header.findIndex(h => h.includes('text') || h.includes('comment'));
+
+    if (userIdx === -1 || textIdx === -1) {
+      return showToast('⚠️ El CSV debe tener columnas "username" y "text"', 'error');
+    }
+
+    // Procesar todas las filas
+    const candidates = [];
+    const stats = {
+      total: 0,
+      withToro: 0,
+      duplicatesInCSV: 0,
+      duplicatesInApp: 0,
+      toImport: 0
+    };
+
+    const seenInThisImport = new Set();
+
+    for (let i = 1; i < lines.length; i++) {
+      const cols = parseCSVLine(lines[i]);
+      if (cols.length <= Math.max(userIdx, textIdx)) continue;
+
+      const username = (cols[userIdx] || '').trim().replace(/^@/, '');
+      const text = (cols[textIdx] || '').trim();
+      if (!username || !text) continue;
+
+      stats.total++;
+
+      // Filtrar: debe contener "TORO" (case-insensitive, palabra)
+      if (!/\btoro\b/i.test(text)) continue;
+      stats.withToro++;
+
+      const handle = '@' + username.toLowerCase();
+
+      // Duplicado dentro del mismo CSV
+      if (seenInThisImport.has(handle)) {
+        stats.duplicatesInCSV++;
+        continue;
+      }
+      seenInThisImport.add(handle);
+
+      // Duplicado contra los participantes ya cargados en la app
+      const alreadyExists = participants.find(
+        p => p.handle && p.handle.toLowerCase() === handle.toLowerCase()
+      );
+      if (alreadyExists) {
+        stats.duplicatesInApp++;
+        continue;
+      }
+
+      // Extraer tags (@menciones) del comentario
+      const tags = (text.match(/@[\w.]+/g) || []);
+      const tagCount = tags.length;
+
+      candidates.push({
+        username,
+        handle,
+        text,
+        tags,
+        tagCount
+      });
+      stats.toImport++;
+    }
+
+    if (candidates.length === 0) {
+      return showToast(`⚠️ No hay nuevos participantes para importar. (${stats.total} comentarios revisados, ${stats.withToro} con TORO, ${stats.duplicatesInApp} ya en la app)`, 'error');
+    }
+
+    // Mostrar modal de confirmación con preview
+    showCSVPreviewModal(candidates, stats);
+  }
+
+  function showCSVPreviewModal(candidates, stats) {
+    const existing = document.getElementById('csv-preview-modal');
+    if (existing) existing.remove();
+
+    const validTags = candidates.filter(c => c.tagCount >= 2).length;
+    const lowTags = candidates.filter(c => c.tagCount < 2).length;
+
+    const modal = document.createElement('div');
+    modal.id = 'csv-preview-modal';
+    modal.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center; z-index:9999; padding:20px; backdrop-filter:blur(8px);';
+
+    modal.innerHTML = `
+      <div style="background:linear-gradient(135deg,#2d1b4e 0%,#1a0b2e 100%); border:1px solid rgba(167,139,250,0.3); border-radius:16px; max-width:700px; width:100%; max-height:85vh; overflow:hidden; display:flex; flex-direction:column;">
+        <div style="padding:24px 24px 16px; border-bottom:1px solid rgba(167,139,250,0.2);">
+          <h2 style="font-size:20px; font-weight:700; color:#f5f3ff; margin:0 0 4px;">📥 Vista Previa de Importación</h2>
+          <p style="font-size:13px; color:#a78bfa; margin:0;">Revisa antes de confirmar</p>
+        </div>
+
+        <div style="padding:20px 24px; border-bottom:1px solid rgba(167,139,250,0.15);">
+          <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px;">
+            <div style="background:rgba(124,58,237,0.15); padding:12px; border-radius:10px; text-align:center;">
+              <div style="font-size:11px; color:#a78bfa; text-transform:uppercase; font-weight:600;">Total</div>
+              <div style="font-size:22px; font-weight:700; color:#f5f3ff; margin-top:4px;">${stats.total}</div>
+            </div>
+            <div style="background:rgba(34,197,94,0.15); padding:12px; border-radius:10px; text-align:center;">
+              <div style="font-size:11px; color:#86efac; text-transform:uppercase; font-weight:600;">A Importar</div>
+              <div style="font-size:22px; font-weight:700; color:#bbf7d0; margin-top:4px;">${stats.toImport}</div>
+            </div>
+            <div style="background:rgba(234,179,8,0.15); padding:12px; border-radius:10px; text-align:center;">
+              <div style="font-size:11px; color:#fde047; text-transform:uppercase; font-weight:600;">Ya en App</div>
+              <div style="font-size:22px; font-weight:700; color:#fef08a; margin-top:4px;">${stats.duplicatesInApp}</div>
+            </div>
+            <div style="background:rgba(239,68,68,0.15); padding:12px; border-radius:10px; text-align:center;">
+              <div style="font-size:11px; color:#fca5a5; text-transform:uppercase; font-weight:600;">Sin TORO</div>
+              <div style="font-size:22px; font-weight:700; color:#fecaca; margin-top:4px;">${stats.total - stats.withToro}</div>
+            </div>
+          </div>
+          <div style="margin-top:14px; padding:12px; background:rgba(167,139,250,0.08); border-radius:10px; font-size:13px; color:#e9d5ff;">
+            ✅ <strong>${validTags}</strong> participaciones cumplen completo (TORO + 2 tags) &nbsp;·&nbsp;
+            ⚠️ <strong>${lowTags}</strong> solo dicen TORO con &lt;2 tags
+          </div>
+        </div>
+
+        <div style="padding:16px 24px; overflow-y:auto; flex:1;">
+          <div style="font-size:13px; color:#a78bfa; font-weight:600; margin-bottom:10px; text-transform:uppercase;">Vista Previa (primeros 10)</div>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            ${candidates.slice(0, 10).map(c => `
+              <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(167,139,250,0.15); border-radius:10px; padding:10px 14px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                  <span style="font-weight:600; color:#f5f3ff; font-size:14px;">${c.handle}</span>
+                  <span style="font-size:11px; padding:3px 8px; border-radius:6px; background:${c.tagCount >= 2 ? 'rgba(34,197,94,0.2)' : 'rgba(234,179,8,0.2)'}; color:${c.tagCount >= 2 ? '#86efac' : '#fde047'};">${c.tagCount} tag${c.tagCount !== 1 ? 's' : ''}</span>
+                </div>
+                <div style="font-size:12px; color:#c4b5fd; word-break:break-word;">${c.text.substring(0, 100)}${c.text.length > 100 ? '...' : ''}</div>
+              </div>
+            `).join('')}
+            ${candidates.length > 10 ? `<div style="text-align:center; color:#a78bfa; font-size:12px; padding:8px;">+ ${candidates.length - 10} más...</div>` : ''}
+          </div>
+        </div>
+
+        <div style="padding:16px 24px; border-top:1px solid rgba(167,139,250,0.2); display:flex; gap:10px;">
+          <button onclick="document.getElementById('csv-preview-modal').remove()" style="flex:1; padding:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(167,139,250,0.3); color:#f5f3ff; border-radius:10px; cursor:pointer; font-size:14px; font-weight:600;">✕ Cancelar</button>
+          <button onclick='confirmCSVImport(${JSON.stringify(candidates).replace(/'/g, "&apos;")})' style="flex:2; padding:12px; background:linear-gradient(135deg,#7c3aed,#a855f7); border:none; color:white; border-radius:10px; cursor:pointer; font-size:14px; font-weight:700;">✅ Importar ${candidates.length} participantes</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+
+  function confirmCSVImport(candidates) {
+    let imported = 0;
+    const now = new Date().toLocaleString('es-MX');
+
+    candidates.forEach(c => {
+      // Double-check duplicados por si el usuario abrió varios imports
+      const exists = participants.find(
+        p => p.handle && p.handle.toLowerCase() === c.handle.toLowerCase()
+      );
+      if (exists) return;
+
+      const tagsText = c.tags.length > 0 ? `Tags: ${c.tags.join(', ')}` : 'Sin tags';
+      const p = {
+        id: Date.now() + Math.floor(Math.random() * 10000),
+        name: c.username,
+        handle: c.handle,
+        commented: 1,
+        stories: 0,
+        billboards: 0,
+        notes: `[Importado CSV] ${tagsText} | "${c.text.substring(0, 80)}${c.text.length > 80 ? '...' : ''}"`,
+        addedAt: now
+      };
+      participants.push(p);
+      imported++;
+    });
+
+    save();
+    updateStats();
+    renderRecent();
+    renderList();
+    renderProbabilities();
+
+    document.getElementById('csv-preview-modal').remove();
+    showToast(`✅ ${imported} participantes importados exitosamente`);
+  }
+  // ============ FIN IMPORTADOR CSV ============
 
   function addParticipant() {
     const name = document.getElementById('p-name').value.trim();
