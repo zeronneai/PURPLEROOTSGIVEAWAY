@@ -38,12 +38,14 @@
   .side-mascot {
     position: fixed;
     left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: clamp(200px, 22vw, 360px);
+    top: 0;
+    height: 100vh;
+    width: auto;
     pointer-events: none;
     z-index: 0;
-    opacity: 0.92;
+    opacity: 0.95;
+    object-fit: cover;
+    object-position: top center;
     filter: drop-shadow(4px 0 24px rgba(0,0,0,0.6));
   }
 
